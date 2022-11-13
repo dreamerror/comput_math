@@ -1,9 +1,22 @@
+from dataclasses import dataclass
+
 import numpy as np
 from sympy import diff, symbols, simplify, Expr
 
 
 def derivative(expr: Expr, order: int) -> Expr:
     return diff(expr, order)
+
+
+@dataclass
+class ValueInfo:
+    val: float
+    x: float
+
+@dataclass
+class MinMax:
+    min: ValueInfo
+    max: ValueInfo
 
 
 class FiniteDifference:
@@ -72,3 +85,26 @@ class NewtonInterpolate:
                 prod *= self.X - x_vals[j]
             expr += prod * self.divided_difference(x_vals[0:i+1])
         return expr[0]
+
+    @property
+    def func_derivative_vals(self) -> MinMax:
+        deriv = derivative(self.func, self.n+1)
+        check_list = list((ValueInfo(val=deriv.subs(self.X, x), x=x)) for x in self.x_vals)
+
+        max_val = max(check_list, key=lambda item: item.val)
+        min_val = min(check_list, key=lambda item: item.val)
+
+        return MinMax(min_val, max_val)
+
+    def rn_vals(self) -> MinMax:
+        prod = simplify("1")
+        for x in self.x_vals:
+            prod *= self.X - x
+
+        derivatives = self.func_derivative_vals
+        max_val = ValueInfo(val=prod.subs(self.X, derivatives.max.x) * derivatives.max.val/np.math.factorial(self.n+1),
+                            x=derivatives.max.x)
+        min_val = ValueInfo(val=prod.subs(self.X, derivatives.min.x) * derivatives.min.val/np.math.factorial(self.n+1),
+                            x=derivatives.min.x)
+
+        return MinMax(min_val, max_val)
