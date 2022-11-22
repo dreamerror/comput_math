@@ -35,9 +35,12 @@ def get_rn_vals(x_vals: list, x_symbol: Symbol, derivatives: MinMax, n: int) -> 
     for x in x_vals:
         prod *= x_symbol - x
 
-    max_val = ValueInfo(val=prod.subs(x_symbol, derivatives.max.x) * derivatives.max.val / np.math.factorial(n + 1),
+    prod_max = prod * (derivatives.max.val / np.math.factorial(n + 1)) / (x_symbol - derivatives.max.x)
+    prod_min = prod * (derivatives.min.val / np.math.factorial(n + 1)) / (x_symbol - derivatives.min.x)
+
+    max_val = ValueInfo(val=prod_max.subs(x_symbol, derivatives.max.x),
                         x=derivatives.max.x)
-    min_val = ValueInfo(val=prod.subs(x_symbol, derivatives.min.x) * derivatives.min.val / np.math.factorial(n + 1),
+    min_val = ValueInfo(val=prod_min.subs(x_symbol, derivatives.min.x),
                         x=derivatives.min.x)
 
     return MinMax(min_val, max_val)
