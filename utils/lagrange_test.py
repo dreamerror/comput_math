@@ -1,7 +1,7 @@
 import numpy as np
 from sympy import symbols, diff, simplify, Expr
 
-from tools import ValueInfo, MinMax, func_diff_vals, get_rn_vals
+from .tools import ValueInfo, MinMax, func_diff_vals, get_rn_vals, derivative
 
 
 class Lagrange:
@@ -41,7 +41,7 @@ class Lagrange:
 
     @property
     def get_func_diff_vals(self) -> MinMax:
-        return func_diff_vals(self.f, self.n, self.X, self.x_vals)
+        return func_diff_vals(derivative(self.f, 1), self.n, self.X, self.x_vals)
 
     @property
     def get_rn(self):
@@ -59,7 +59,7 @@ class Lagrange:
 
     def get_rnk_values(self) -> MinMax:
         rnk = self.get_rnk_formula
-        values = list((ValueInfo(x, rnk.subs(self.X, x)) for x in self.x_vals))
+        values = list((ValueInfo((rnk / (self.X - x)).subs(self.X, x), x) for x in self.x_vals))
 
         max_val = max(values, key=lambda x: x.val)
         min_val = min(values, key=lambda x: x.val)

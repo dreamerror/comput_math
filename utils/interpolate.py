@@ -1,7 +1,7 @@
 import numpy as np
 from sympy import symbols, simplify, Expr
 
-from tools import MinMax, func_diff_vals, get_rn_vals
+from .tools import MinMax, func_diff_vals, get_rn_vals
 
 
 class FiniteDifference:
@@ -34,7 +34,6 @@ class FiniteDifference:
         return (self.call_func(self.x_vals[index]) - self.call_func(self.x_vals[index - 1])) / self.step
 
     def dif_central(self, index: float, order: int = 1):
-        index += len(self.x_vals) // 2
         if order > 1:
             return self.dif_central(index+0.5, order-1) - self.dif_central(index-0.5, order-1)
         else:
@@ -102,14 +101,14 @@ class Gauss:
 
     def poly(self, n: int):
         result = simplify(f"{self.call_func(self.x_0)}")
-        for i in range(1, 2*n+1):
+        for i in range(1, n+1):
             prod = simplify("1")
             for j in range(i):
                 prod *= self.X - j
             prod /= np.math.factorial(i)
             if i % 2:
-                prod *= self.dif.dif_central(0.5, i)
+                prod *= self.dif.dif_central(0.5 + self.n // 2, i)
             else:
-                prod *= self.dif.dif_central(0, i)
+                prod *= self.dif.dif_central(self.n // 2, i)
             result += prod
         return result
