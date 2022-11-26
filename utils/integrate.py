@@ -37,3 +37,14 @@ class Integrate:
         for i in range(n):
             res += self.__func((x_vals[i] + x_vals[i+1])/2) * (x_vals[i+1] - x_vals[i])
         return res
+
+    def cotes_method(self, n: int):
+        x_vals = list(np.linspace(self.x_0, self.x_n, n))
+        step = x_vals[1] - x_vals[0]
+        x_vals.append(x_vals[::-1] + step)
+        res = (self.__func(x_vals[0]) + self.__func(x_vals[n])) / 2
+        for i in range(1, n):
+            res += self.__func(x_vals[i])
+        return res * step
+
+
