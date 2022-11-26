@@ -42,9 +42,17 @@ class Integrate:
             res += self.__func(x_vals[i])
         return res * step
 
-    def simpson(self):
-        return ((self.x_n - self.x_0) / 6) * (self.__func(self.x_0) + 4 * self.__func((self.x_0 + self.x_n) / 2) +
-                                              self.__func(self.x_n))
+    def simpson(self, n: int):
+        res = self.__func(self.x_0) + self.__func(self.x_n)
+        N = 2*n
+        x_vals = list(np.linspace(self.x_0, self.x_n, N+1))
+        step = (self.x_n - self.x_0) / N
+        for k in range(1, N):
+            if k % 2:
+                res += 4 * self.__func(x_vals[k])
+            else:
+                res += 2 * self.__func(x_vals[k])
+        return res * (step / 3)
 
     def monte_carlo(self, n: int):
         res = 0
