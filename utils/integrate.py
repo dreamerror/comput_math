@@ -1,7 +1,9 @@
 from random import uniform
 
 import numpy as np
-from sympy import Expr, symbols
+from sympy import Expr, symbols, integrate
+
+from .tools import derivative
 
 
 class Integrate:
@@ -12,6 +14,16 @@ class Integrate:
 
     def __func(self, x: float):
         return self.func.subs(symbols("x"), x)
+
+    @property
+    def definite_integral(self):
+        return integrate(self.func, (symbols("x"), self.x_0, self.x_n))
+
+    def abs_mistake(self, i_n: float) -> float:
+        return abs(self.definite_integral.evalf() - i_n)
+
+    def rel_mistake(self, i_n: float) -> float:
+        return self.abs_mistake(i_n)/abs(self.definite_integral)
 
     def left_rectangles(self, n: int):
         res = 0
@@ -60,3 +72,18 @@ class Integrate:
             a = uniform(self.x_0, self.x_n)
             res += self.__func(a)
         return res * ((self.x_n - self.x_0) / n)
+
+    def r_n_left(self, n: int) -> float:
+        x_vals = list(np.linspace(self.x_0, self.x_n, n + 1))
+        y_vals = list((derivative(self.func, 1).subs(symbols("x"), x).evalf() for x in x_vals))
+        y = max(y_vals, key=lambda item: abs(item))
+        return y/2 * (self.x_n - self.x_0)**2
+
+    def r_n_right(self, n: int) -> float:
+        return -1 * self.r_n_left(n)
+
+    def r_n_central(self, n: int):
+        x_vals = list(np.linspace(self.x_0, self.x_n, n + 1))
+        y_vals = list((derivative(self.func, 2).subs(symbols("x"), x).evalf() for x in x_vals))
+        y = max(y_vals, key=lambda item: abs(item))
+        return y / 24 * (self.x_n - self.x_0) ** 3
