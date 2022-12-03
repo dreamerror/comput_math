@@ -47,6 +47,10 @@ class Integrate:
         return res
 
     def cotes_method(self, n: int):
+        """
+        Also known as Trapezoidal method
+        Cotes' formula is just a pretty version that I found on Russian Wiki page
+        """
         x_vals = list(np.linspace(self.x_0, self.x_n, n+1))
         step = x_vals[1] - x_vals[0]
         res = (self.__func(x_vals[0]) + self.__func(x_vals[n])) / 2
@@ -82,8 +86,29 @@ class Integrate:
     def r_n_right(self, n: int) -> float:
         return -1 * self.r_n_left(n)
 
-    def r_n_central(self, n: int):
+    def r_n_central(self, n: int) -> float:
         x_vals = list(np.linspace(self.x_0, self.x_n, n + 1))
         y_vals = list((derivative(self.func, 2).subs(symbols("x"), x).evalf() for x in x_vals))
         y = max(y_vals, key=lambda item: abs(item))
         return y / 24 * (self.x_n - self.x_0) ** 3
+
+    def r_n_cotes(self, n: int) -> float:
+        x_vals = np.linspace(self.x_0, self.x_n, n + 1)
+        y_vals = list((derivative(self.func, 2).subs(symbols("x"), x).evalf() for x in list(x_vals)))
+        y = max(y_vals, key=lambda item: abs(item)) * -1
+        return y/12 * (self.x_n - self.x_0) * ((self.x_n - self.x_0)/(n+1))**2
+
+    def r_n_simpson(self, n: int) -> float:
+        x_vals = list(np.linspace(self.x_0, self.x_n, n + 1))
+        y_vals = list((derivative(self.func, 4).subs(symbols("x"), x).evalf() for x in x_vals))
+        y = max(y_vals, key=lambda item: abs(item))
+        return -1 * (((self.x_n - self.x_0)/180) * ((self.x_n - self.x_0)/(n+1))**4 * y)
+
+    def r_n_monte(self, n: int) -> float:
+        """
+        Dispersion should be similar for great enough n,
+        so estimation quite ok
+        """
+        x_vals = list(uniform(self.x_0, self.x_n) for i in range(n+1))
+        dispersion = float(np.var(x_vals))
+        return np.math.sqrt(dispersion/n)
