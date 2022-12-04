@@ -81,7 +81,7 @@ class Integrate:
         x_vals = list(np.linspace(self.x_0, self.x_n, n + 1))
         y_vals = list((derivative(self.func, 1).subs(symbols("x"), x).evalf() for x in x_vals))
         y = max(y_vals, key=lambda item: abs(item))
-        return y/2 * (self.x_n - self.x_0)**2
+        return y/(2*(n+1)) * (self.x_n - self.x_0)**2
 
     def r_n_right(self, n: int) -> float:
         return -1 * self.r_n_left(n)
