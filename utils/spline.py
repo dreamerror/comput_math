@@ -17,9 +17,8 @@ class Spline:
     def derivative(self, order: int, p: float) -> float:
         return derivative(self.func, order).subs(symbols("x"), p).evalf()
 
-    @property
-    def norm(self) -> float:
-        return max(list(self.__func(p) for p in (self.x_i, self.x_i_1)))
+    def norm(self, func: Expr) -> float:
+        return max(list(func.subs(symbols("x"), p) for p in (self.x_i, self.x_i_1)))
 
     @property
     def a_i(self) -> float:
@@ -49,6 +48,15 @@ class Spline:
         res += self.c_i * (x - self.x_i) ** 2
         res += self.d_i * (x - self.x_i) ** 3
         return res
+
+    @property
+    def abs_mistake(self) -> float:
+        func = self.equation - self.func
+        return self.norm(func)
+
+    @property
+    def rel_mistake(self) -> float:
+        return (self.abs_mistake/self.norm(self.func)) * 100
 
 
 class SplineGroup:
