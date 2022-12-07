@@ -31,23 +31,45 @@ class Spline:
 
     @property
     def c_i(self) -> float:
-        der_sum = (self.derivative(1, self.x_i) + self.derivative(1, self.x_i_1))/2
-        val_diff = (self.__func(self.x_i_1) - self.__func(self.x_i))/self.h_i
-        return (12/(self.h_i**2)) * (der_sum - val_diff)
+        der_sum = (self.derivative(1, self.x_i) + self.derivative(1, self.x_i_1)) / 2
+        val_diff = (self.__func(self.x_i_1) - self.__func(self.x_i)) / self.h_i
+        return (12 / (self.h_i ** 2)) * (der_sum - val_diff)
 
     @property
     def d_i(self) -> float:
-        der = (-2 * self.derivative(1, self.x_i) + self.derivative(1, self.x_i_1))/3
-        val = (self.__func(self.x_i_1) - self.__func(self.x_i))/self.h_i
-        return (6/self.h_i) * (der + val)
+        der = (-2 * self.derivative(1, self.x_i) + self.derivative(1, self.x_i_1)) / 3
+        val = (self.__func(self.x_i_1) - self.__func(self.x_i)) / self.h_i
+        return (6 / self.h_i) * (der + val)
 
     @property
     def equation(self) -> Expr:
         x = symbols("x")
         res = simplify(self.a_i)
         res += self.b_i * (x - self.x_i)
-        res += self.c_i * (x - self.x_i)**2
-        res += self.d_i * (x - self.x_i)**3
+        res += self.c_i * (x - self.x_i) ** 2
+        res += self.d_i * (x - self.x_i) ** 3
         return res
 
 
+class SplineGroup:
+    def __init__(self, x_0: float, x_n: float, n: int, func: Expr):
+        self.func = func
+        self.x_0 = x_0
+        self.x_n = x_n
+        self.n = n
+
+    @property
+    def x_vals(self) -> list[float]:
+        return list(np.linspace(self.x_0, self.x_n, self.n + 1))
+
+    @property
+    def h(self) -> float:
+        return self.x_vals[1] - self.x_vals[0]
+
+    @property
+    def splines(self) -> list[Spline]:
+        return list((Spline(self.x_vals[i],
+                            self.x_vals[i + 1],
+                            self.h,
+                            self.func)
+                     for i in range(self.n)))
